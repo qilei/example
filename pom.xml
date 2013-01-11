@@ -15,5 +15,6 @@
     <module>my_memcached</module>
     <module>my_mqtt</module>
     <module>my_redis</module>
+    <module>my_sqlite</module>
   </modules>
 </project>
