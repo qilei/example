@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/TestModule/TestModule.iml" filepath="$PROJECT_DIR$/TestModule/TestModule.iml" />
+      <module fileurl="file://$PROJECT_DIR$/example.iml" filepath="$PROJECT_DIR$/example.iml" />
+      <module fileurl="file://$PROJECT_DIR$/my_kafka/my_kafka.iml" filepath="$PROJECT_DIR$/my_kafka/my_kafka.iml" />
+      <module fileurl="file://$PROJECT_DIR$/my_memcached/my_memcached.iml" filepath="$PROJECT_DIR$/my_memcached/my_memcached.iml" />
+      <module fileurl="file://$PROJECT_DIR$/my_mqtt/my_mqtt.iml" filepath="$PROJECT_DIR$/my_mqtt/my_mqtt.iml" />
+      <module fileurl="file://$PROJECT_DIR$/my_netty/my_netty.iml" filepath="$PROJECT_DIR$/my_netty/my_netty.iml" />
+      <module fileurl="file://$PROJECT_DIR$/my_redis/my_redis.iml" filepath="$PROJECT_DIR$/my_redis/my_redis.iml" />
+      <module fileurl="file://$PROJECT_DIR$/my_sphinx/my_sphinx.iml" filepath="$PROJECT_DIR$/my_sphinx/my_sphinx.iml" />
+      <module fileurl="file://$PROJECT_DIR$/my_sqlite/my_sqlite.iml" filepath="$PROJECT_DIR$/my_sqlite/my_sqlite.iml" />
+      <module fileurl="file://$PROJECT_DIR$/webapp/webapp.iml" filepath="$PROJECT_DIR$/webapp/webapp.iml" />
+    </modules>
+  </component>
+</project>
+
