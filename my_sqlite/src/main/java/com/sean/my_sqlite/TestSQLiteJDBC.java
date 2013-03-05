@@ -19,7 +19,8 @@ public class TestSQLiteJDBC {
             c.setAutoCommit(false);   
   
             Statement st = c.createStatement();   
-            st.executeUpdate("update user set sex=1 where id=5");   
+            int count = st.executeUpdate("update user set sex=1 where id<=5"); 
+            System.out.println(count);
                
             ResultSet rs = st.executeQuery("SELECT * FROM user");   
             while (rs.next()) {   

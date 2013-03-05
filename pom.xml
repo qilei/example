@@ -16,5 +16,6 @@
     <module>my_mqtt</module>
     <module>my_redis</module>
     <module>my_sqlite</module>
+      <module>TestModule</module>
   </modules>
 </project>
