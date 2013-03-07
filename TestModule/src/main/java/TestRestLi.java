@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 public class TestRestLi {
 
     public static void main(String[] args) {
-        for(int i=0; i<500; i++) {
+        for(int i=0; i<8000; i++) {
             new Thread(new RestLiClient()).start();
         }
     }
@@ -32,6 +32,7 @@ public class TestRestLi {
         public void run() {
             try{
                 Random random = new Random();
+//                String url = "http://10.13.81.93:8090/server/fortunes/" + random.nextInt(10);
                 String url = "http://localhost:8080/server/fortunes/" + random.nextInt(10);
                 logger.info(url);
 
