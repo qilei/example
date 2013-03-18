@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 public class TestRestLi {
 
     public static void main(String[] args) {
-        for(int i=0; i<8000; i++) {
+        for(int i=0; i<5000; i++) {
             new Thread(new RestLiClient()).start();
         }
     }
