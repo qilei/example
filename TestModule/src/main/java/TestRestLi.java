@@ -33,7 +33,7 @@ public class TestRestLi {
             try{
                 Random random = new Random();
 //                String url = "http://10.13.81.93:8090/server/fortunes/" + random.nextInt(10);
-                String url = "http://localhost:8080/server/fortunes/" + random.nextInt(10);
+                String url = "http://localhost:8080/users/" + random.nextInt(10);
                 logger.info(url);
 
                 HttpClient httpClient = new DefaultHttpClient();
