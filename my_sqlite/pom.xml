@@ -23,9 +23,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-	  <groupId>org.xerial</groupId>
-	  <artifactId>SQLiteJDBC</artifactId>
-	  <version>3.7.2</version>
+	  <groupId>org.xerial.thirdparty</groupId>
+	  <artifactId>sqlitejdbc-nested</artifactId>
+	  <version>3.6.2</version>
 	</dependency>
   </dependencies>
 </project>
