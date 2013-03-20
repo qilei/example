@@ -1,6 +1,8 @@
 package com.sean.annotation;
 
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.Enumeration;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,5 +33,12 @@ public class AnnotationTest {
     public static void main(String[] args) throws Exception {
         AnnotationTest at = new AnnotationTest();
         at.parseMethod(SayHello.class);
+        System.out.println(System.getProperty("user.dir"));
+        Enumeration<URL> dirs = Thread.currentThread().getContextClassLoader().getResources("com/sean/annotation");
+
+        while(dirs.hasMoreElements()){
+            System.out.println(dirs.nextElement());
+        }
+
     }
 }
