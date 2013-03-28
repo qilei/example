@@ -2,23 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="64088b40-ab2c-4b45-9445-aa6c956ee2c0" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/TestModule/src/main/java/com/sean/annotation/Scanner.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/TestModule/src/main/java/com/sean/annotation/AnnotationTest.java" afterPath="$PROJECT_DIR$/TestModule/src/main/java/com/sean/annotation/AnnotationTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/TestModule/TestModule.iml" afterPath="$PROJECT_DIR$/TestModule/TestModule.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/encodings.xml" afterPath="$PROJECT_DIR$/.idea/encodings.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/example.iml" afterPath="$PROJECT_DIR$/example.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/my_kafka/my_kafka.iml" afterPath="$PROJECT_DIR$/my_kafka/my_kafka.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/my_memcached/my_memcached.iml" afterPath="$PROJECT_DIR$/my_memcached/my_memcached.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/my_netty/my_netty.iml" afterPath="$PROJECT_DIR$/my_netty/my_netty.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/my_sphinx/my_sphinx.iml" afterPath="$PROJECT_DIR$/my_sphinx/my_sphinx.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/my_sqlite/my_sqlite.iml" afterPath="$PROJECT_DIR$/my_sqlite/my_sqlite.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/webapp/webapp.iml" afterPath="$PROJECT_DIR$/webapp/webapp.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="example.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="64088b40-ab2c-4b45-9445-aa6c956ee2c0" time="1363749819324" ignored="false" />
+    <file path="/Dummy.txt" changelist="64088b40-ab2c-4b45-9445-aa6c956ee2c0" time="1363762319578" ignored="false" />
     <file path="/pom.xml" changelist="64088b40-ab2c-4b45-9445-aa6c956ee2c0" time="1362383561373" ignored="false" />
     <file path="/TestRestLi.java" changelist="64088b40-ab2c-4b45-9445-aa6c956ee2c0" time="1362384409248" ignored="false" />
     <file path="$PROJECT_DIR$/../example-standalone-app/client/build.gradle" changelist="64088b40-ab2c-4b45-9445-aa6c956ee2c0" time="1362385864232" ignored="false" />
@@ -32,7 +20,7 @@
     <file path="/ServerRunner.java" changelist="64088b40-ab2c-4b45-9445-aa6c956ee2c0" time="1362478762682" ignored="false" />
     <file path="$PROJECT_DIR$/../example-standalone-app/server/build.gradle" changelist="64088b40-ab2c-4b45-9445-aa6c956ee2c0" time="1362479607214" ignored="false" />
     <file path="/build.gradle" changelist="64088b40-ab2c-4b45-9445-aa6c956ee2c0" time="1362479384961" ignored="false" />
-    <file path="F:/workspace/framework/.idea/workspace.xml" changelist="64088b40-ab2c-4b45-9445-aa6c956ee2c0" time="1363762269021" ignored="false" />
+    <file path="F:/workspace/framework/.idea/workspace.xml" changelist="64088b40-ab2c-4b45-9445-aa6c956ee2c0" time="1363762305025" ignored="false" />
     <file path="/AnnotationTest.java" changelist="64088b40-ab2c-4b45-9445-aa6c956ee2c0" time="1363750116362" ignored="false" />
     <file path="F:/workspace/framework/framework-common/src/test/java/com/sohu/smc/common/test/DynamicPropertyTest.java" changelist="64088b40-ab2c-4b45-9445-aa6c956ee2c0" time="1363748494505" ignored="false" />
     <file path="/RequestMapping.java" changelist="64088b40-ab2c-4b45-9445-aa6c956ee2c0" time="1363752666493" ignored="false" />
@@ -498,7 +486,11 @@
       <created>1362453056309</created>
       <updated>1362453056309</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="test">
+      <created>1363762325080</created>
+      <updated>1363762325080</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -565,7 +557,7 @@
     <option name="MAXIMUM_HISTORY_ROWS" value="1000" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="add TestModule" />
+    <option name="LAST_COMMIT_MESSAGE" value="test" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="false" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -579,6 +571,7 @@
     <option name="SHOW_FILE_HISTORY_AS_TREE" value="false" />
     <option name="FILE_HISTORY_SPLITTER_PROPORTION" value="0.6" />
     <MESSAGE value="add TestModule" />
+    <MESSAGE value="test" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />

@@ -17,5 +17,6 @@
     <module>my_redis</module>
     <module>my_sqlite</module>
     <module>TestModule</module>
+    <module>my_tarantool</module>
   </modules>
 </project>
