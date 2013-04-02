@@ -12,42 +12,37 @@ import java.util.logging.Logger;
 import org.json.JSONObject;
 import org.tarantool.core.Tuple;
 
+import com.salesforce.phoenix.parse.DeleteStatement;
+import com.salesforce.phoenix.parse.SQLStatement;
+import com.salesforce.phoenix.parse.SelectStatement;
+import com.salesforce.phoenix.parse.UpsertStatement;
+
 public class CacheStatement implements Statement{
 	
 	private static Logger log = Logger.getLogger(CacheStatement.class.getName());
 	
-	private Connection connection;
-	private CacheConnection cacheConnection;
+	protected Connection connection;
+	protected CacheConnection cacheConnection;
 	
-	private String table;
-    private Map<String, String> fields;
-    private Map<String, Object> conditions;
-    private Map<String, Object> paramValues;
-    private int bindCount;
+	protected String table;
+	protected Map<String, String> fields;
+	protected Map<String, Object> conditions;
+	protected Map<String, Object> paramValues;
+	protected int bindCount;
 
-    private MetaData tableInfo;
-    private String unique_index_column;
+	protected MetaData tableInfo;
+	protected String unique_index_column;
 	
 	public CacheStatement(Connection conn) {
 		this.connection = conn;
 		cacheConnection = (CacheConnection) conn;
 	}
 	
-	public <T> T unwrap(Class<T> iface) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public boolean isWrapperFor(Class<?> iface) throws SQLException {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 	public ResultSet executeQuery(String sql) throws SQLException {
 		try{
 			
 			CacheSQLParser parser = new CacheSQLParser(connection, sql).parseQuery();
-			parseQ(parser, sql);
+			parse(parser, sql);
 			
 			return runQ();
 			
@@ -55,24 +50,6 @@ public class CacheStatement implements Statement{
 			e.printStackTrace();
 		}
 		return null;
-	}
-	
-	private void parseQ(CacheSQLParser parser, String sql) throws Exception {
-		
-		
-        table = parser.getTableName();
-        if(table == null) throw new Exception("Please specify the table name to be search.");
-
-        tableInfo = parser.queryTableInfo(table);
-        if(tableInfo == null) throw new Exception("table '"+table+"' is not exist.");
-
-        fields = parser.getSelectFields(tableInfo);
-        if(fields == null) throw new Exception("Please specify the fields to be search.");
-
-        conditions = parser.getWhere(tableInfo);
-        if(conditions == null) throw new UnSupportException("Please specify query condition in where clause.");
-        
-        bindCount = parser.getBindCount();
 	}
 	
 	private ResultSet runQ() throws Exception {
@@ -95,63 +72,26 @@ public class CacheStatement implements Statement{
         ResultSet rs = new TarantoolReslutSet(_tuple, trsmd);
 
         return rs;
-    }
-	
-	private void setValue(Tuple tuple, String fieldInfo, Object value) {
-        String info[] = fieldInfo.split("\\|");
-        if(info[1].equals(CONFIG.TYPE_INT)) {
-            tuple.setInt(Integer.parseInt(info[0]), (Integer) value);
-        }else if(info[1].equals(CONFIG.TYPE_STR)) {
-            tuple.setString(Integer.parseInt(info[0]), String.valueOf(value), CONFIG.DEFAULT_ENCODE);
-        }
-    }
+    }	
 	
 	public int executeUpdate(String sql) throws SQLException {
 		try{
-			CacheSQLParser parser = new CacheSQLParser(connection, sql).parseUpsert();
-			parseU(parser, sql);
-			return runU();
+			CacheSQLParser parser = new CacheSQLParser(connection, sql).parse();
+			parse(parser, sql);
+			
+			SQLStatement statement = parser.getStatement();
+			if(statement instanceof UpsertStatement) {
+				return runU();
+			}else if(statement instanceof DeleteStatement){
+				return runD();
+			}
 		}catch(Exception e) {
 			e.printStackTrace();
-			return 0;
 		}
+		return 0;
 	}
-	
-	private void parseU(CacheSQLParser parser, String sql) throws Exception {
-		table = parser.getTableName();
-        if(table == null) throw new Exception("Please specify the table name to be update.");
-
-        tableInfo = parser.queryTableInfo(table);
-        if(tableInfo == null) throw new Exception("table '"+table+"' is not exist.");
-
-        bindCount = parser.getBindCount();
-
-        paramValues = parser.getParamValues(tableInfo);
-        
-        validateParamValues();
-	}
-	
-	/**
-     * 校验更新的字段是否带有唯一索引，如果没有唯一索引字段，无法执行更新操作
-     * @throws Exception
-     */
-    private void validateParamValues() throws Exception {
-        JSONObject indexes = new JSONObject(tableInfo.getIndexes());
-        boolean flag = false;
-        for(String field : paramValues.keySet()) {
-            if(indexes.has(field) && indexes.getString(field).equals(CONFIG.INDEX_UNIQUE)) {
-                flag = true;
-                unique_index_column = field;
-                break;
-            }
-        }
-
-        if(!flag) {
-            throw new UnSupportException("The fields to be update have no unique index, can't be updated.");
-        }
-    }
-    
-    private Integer runU() throws Exception {
+	  
+	private Integer runU() throws Exception {
 
         JSONObject fields = new JSONObject(tableInfo.getFields());
 
@@ -184,198 +124,228 @@ public class CacheStatement implements Statement{
         }
 
     }
+    
+    private Integer runD() throws Exception {
+        JSONObject fields = new JSONObject(tableInfo.getFields());
+
+        Tuple tuple = new Tuple(conditions.size());
+
+        for(Map.Entry<String, Object> entry : conditions.entrySet()) {
+            String fieldInfo = fields.getString(entry.getKey());
+            setValue(tuple, fieldInfo, entry.getValue());
+        }
+
+        return cacheConnection.getTaranConn().delete(tableInfo.getSpace(), tuple);
+    }
+    
+    protected void parse(CacheSQLParser parser, String sql) throws Exception {
+		table = parser.getTableName();
+        if(table == null) throw new Exception("Please specify the table name to be update.");
+
+        tableInfo = parser.queryTableInfo(table);
+        if(tableInfo == null) throw new Exception("table '"+table+"' is not exist.");
+
+        bindCount = parser.getBindCount();
+        
+        SQLStatement statement = parser.getStatement();
+        if(statement instanceof SelectStatement) {
+        	fields = parser.getSelectFields(tableInfo);
+            if(fields == null) throw new Exception("Please specify the fields to be search.");
+
+            conditions = parser.getWhere(tableInfo);
+            if(conditions == null) throw new UnSupportException("Please specify query condition in where clause.");
+            
+        }else if(statement instanceof UpsertStatement) {
+        	paramValues = parser.getParamValues(tableInfo);  
+            validateParamValues();
+            
+        }else if(statement instanceof DeleteStatement) {
+        	conditions = parser.getWhere(tableInfo);
+        	if(conditions == null) throw new UnSupportException("Please specify query condition in where clause.");
+        }
+	}
+	
+	/**
+     * 校验更新的字段是否带有唯一索引，如果没有唯一索引字段，无法执行更新操作
+     * @throws Exception
+     */
+    protected void validateParamValues() throws Exception {
+        JSONObject indexes = new JSONObject(tableInfo.getIndexes());
+        boolean flag = false;
+        for(String field : paramValues.keySet()) {
+            if(indexes.has(field) && indexes.getString(field).equals(CONFIG.INDEX_UNIQUE)) {
+                flag = true;
+                unique_index_column = field;
+                break;
+            }
+        }
+
+        if(!flag) {
+            throw new UnSupportException("The fields to be update have no unique index, can't be updated.");
+        }
+    }
+    
+    protected void setValue(Tuple tuple, String fieldInfo, Object value) {
+        String info[] = fieldInfo.split("\\|");
+        if(info[1].equals(CONFIG.TYPE_INT)) {
+            tuple.setInt(Integer.parseInt(info[0]), (Integer) value);
+        }else if(info[1].equals(CONFIG.TYPE_STR)) {
+            tuple.setString(Integer.parseInt(info[0]), String.valueOf(value), CONFIG.DEFAULT_ENCODE);
+        }else if(info[1].equals(CONFIG.TYPE_BOOL)) {
+            tuple.setBoolean(Integer.parseInt(info[0]), Boolean.valueOf(String.valueOf(value)));
+        }
+    }
 	
 	public void close() throws SQLException {
 		connection.close();
 	}
 
 	public int getMaxFieldSize() throws SQLException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public void setMaxFieldSize(int max) throws SQLException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public int getMaxRows() throws SQLException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public void setMaxRows(int max) throws SQLException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setEscapeProcessing(boolean enable) throws SQLException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public int getQueryTimeout() throws SQLException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public void setQueryTimeout(int seconds) throws SQLException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void cancel() throws SQLException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public SQLWarning getWarnings() throws SQLException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public void clearWarnings() throws SQLException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setCursorName(String name) throws SQLException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public boolean execute(String sql) throws SQLException {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	public ResultSet getResultSet() throws SQLException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public int getUpdateCount() throws SQLException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public boolean getMoreResults() throws SQLException {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	public void setFetchDirection(int direction) throws SQLException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public int getFetchDirection() throws SQLException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public void setFetchSize(int rows) throws SQLException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public int getFetchSize() throws SQLException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public int getResultSetConcurrency() throws SQLException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public int getResultSetType() throws SQLException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public void addBatch(String sql) throws SQLException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void clearBatch() throws SQLException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public int[] executeBatch() throws SQLException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public Connection getConnection() throws SQLException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public boolean getMoreResults(int current) throws SQLException {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	public ResultSet getGeneratedKeys() throws SQLException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public int executeUpdate(String sql, int autoGeneratedKeys)
 			throws SQLException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public int executeUpdate(String sql, int[] columnIndexes)
 			throws SQLException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public int executeUpdate(String sql, String[] columnNames)
 			throws SQLException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public boolean execute(String sql, int autoGeneratedKeys)
 			throws SQLException {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	public boolean execute(String sql, int[] columnIndexes) throws SQLException {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	public boolean execute(String sql, String[] columnNames)
 			throws SQLException {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	public int getResultSetHoldability() throws SQLException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public boolean isClosed() throws SQLException {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	public void setPoolable(boolean poolable) throws SQLException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public boolean isPoolable() throws SQLException {
-		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	public <T> T unwrap(Class<T> iface) throws SQLException {
+		return null;
+	}
+
+	public boolean isWrapperFor(Class<?> iface) throws SQLException {
 		return false;
 	}
 

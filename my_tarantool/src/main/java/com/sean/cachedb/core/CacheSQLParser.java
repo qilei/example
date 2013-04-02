@@ -34,7 +34,6 @@ public class CacheSQLParser {
 	private static Logger log = Logger.getLogger(CacheSQLParser.class.getName());
 	
 	private Connection connection;
-	private String sql;
 	private SQLParser parser;
 	private SQLStatement statement;
 	
@@ -44,7 +43,6 @@ public class CacheSQLParser {
 	
 	public CacheSQLParser(Connection connection, String sql) {
 		this.connection = connection;
-		this.sql = sql;
 		try{
 			parser = new SQLParser(new StringReader(sql));
 			if(parser == null) {
@@ -80,6 +78,10 @@ public class CacheSQLParser {
 			deleteStatement = (DeleteStatement) statement;
 		}
 		return this;
+	}
+	
+	public SQLStatement getStatement() {
+		return statement;
 	}
 	
 	public String getTableName() throws Exception {
@@ -207,46 +209,48 @@ public class CacheSQLParser {
     }
     
     public Map<String, Object> getParamValues(MetaData tableInfo) throws Exception {
-    	List<ParseNode> columns = upsertStatement.getColumns();
-        List<ParseNode> values = upsertStatement.getValues();
-        if(columns.size() > values.size()) {
-            throw new UnSupportException("SQL statement has an syntax error! field's number > value's number.");
-        }
-
-        Map<String, Object> paramValues = new LinkedHashMap<String, Object>();
-        if(columns.size() == 0) {    //如果SQL语句中没有指明更新的字段信息，则按数据表所有字段全部更新，如果给定的参数值数目小于字段数目，则抛出异常
-
-            JSONObject fields = new JSONObject(tableInfo.getFields());
-
-            if(values.size() < fields.length()) {
-                throw new IllegalArgumentException("SQL statement has an syntax error! value's number < table's field number.");
-            }
-
-            Iterator iterator = fields.keys();
-            while(iterator.hasNext()) {
-                String column = (String) iterator.next();
-                int index = Integer.parseInt(fields.getString(column).split("\\|")[0]);
-                Object value = null;
-                ParseNode valueNode =  values.get(index);
-                if(valueNode instanceof LiteralParseNode) {
-                    value = ((LiteralParseNode) valueNode).getValue();
-                }else if(valueNode instanceof BindParseNode) {  //如果SQL语句中存在绑定参数
-                    value = ((BindParseNode) valueNode).getIndex();
-                }
-                paramValues.put(column.toLowerCase(), value);
-            }
-        }else {
-            for(int i=0; i<columns.size(); i++) {
-                Object value = null;
-                ParseNode valueNode =  values.get(i);
-                if(valueNode instanceof LiteralParseNode) {
-                    value = ((LiteralParseNode) valueNode).getValue();
-                }else if(valueNode instanceof BindParseNode) {
-                    value = ((BindParseNode) valueNode).getIndex();
-                }
-                paramValues.put(((ColumnParseNode) columns.get(i)).getFullName().toLowerCase(), value);
-            }
-        }
+    	Map<String, Object> paramValues = new LinkedHashMap<String, Object>();
+    	if(upsertStatement != null) {
+	    	List<ParseNode> columns = upsertStatement.getColumns();
+	        List<ParseNode> values = upsertStatement.getValues();
+	        if(columns.size() > values.size()) {
+	            throw new UnSupportException("SQL statement has an syntax error! field's number > value's number.");
+	        }
+	        
+	        if(columns.size() == 0) {    //如果SQL语句中没有指明更新的字段信息，则按数据表所有字段全部更新，如果给定的参数值数目小于字段数目，则抛出异常
+	
+	            JSONObject fields = new JSONObject(tableInfo.getFields());
+	
+	            if(values.size() < fields.length()) {
+	                throw new IllegalArgumentException("SQL statement has an syntax error! value's number < table's field number.");
+	            }
+	
+	            Iterator<?> iterator = fields.keys();
+	            while(iterator.hasNext()) {
+	                String column = (String) iterator.next();
+	                int index = Integer.parseInt(fields.getString(column).split("\\|")[0]);
+	                Object value = null;
+	                ParseNode valueNode =  values.get(index);
+	                if(valueNode instanceof LiteralParseNode) {
+	                    value = ((LiteralParseNode) valueNode).getValue();
+	                }else if(valueNode instanceof BindParseNode) {  //如果SQL语句中存在绑定参数
+	                    value = ((BindParseNode) valueNode).getIndex();
+	                }
+	                paramValues.put(column.toLowerCase(), value);
+	            }
+	        }else {
+	            for(int i=0; i<columns.size(); i++) {
+	                Object value = null;
+	                ParseNode valueNode =  values.get(i);
+	                if(valueNode instanceof LiteralParseNode) {
+	                    value = ((LiteralParseNode) valueNode).getValue();
+	                }else if(valueNode instanceof BindParseNode) {
+	                    value = ((BindParseNode) valueNode).getIndex();
+	                }
+	                paramValues.put(((ColumnParseNode) columns.get(i)).getFullName().toLowerCase(), value);
+	            }
+	        }
+    	}
 
         return paramValues;
     }

@@ -14,5 +14,7 @@ public class TestConnection {
 		CacheDriver driver = new CacheDriver();
 		Connection conn = driver.connect("jdbc:tarantool://" + host + ":" + port);
 		log.info("连接是否关闭？" + conn.isClosed());
+		
+		conn.close();
 	}
 }

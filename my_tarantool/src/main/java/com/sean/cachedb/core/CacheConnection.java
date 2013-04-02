@@ -23,14 +23,10 @@ import org.tarantool.facade.TarantoolTemplate;
 
 public class CacheConnection implements Connection {
 	
-	private String host;
-	private int port;
 	private TarantoolConnection connection;
 	private static TarantoolTemplate template;
 	
 	public CacheConnection(String host, int port, TarantoolConnection connection, TarantoolTemplate tp) {
-		this.host = host;
-		this.port = port;
 		this.connection = connection;
 		template = tp;
 	}
@@ -56,7 +52,13 @@ public class CacheConnection implements Connection {
 	}
 
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
-		return null;
+		PreparedStatement preparedStatement = null;
+		try {
+			preparedStatement = new CachePreparedStatement(this, sql);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return preparedStatement;
 	}
 
 	public CallableStatement prepareCall(String sql) throws SQLException {

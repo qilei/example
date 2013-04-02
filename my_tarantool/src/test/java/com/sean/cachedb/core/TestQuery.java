@@ -16,7 +16,7 @@ public class TestQuery {
 		CacheDriver driver = new CacheDriver();
 		Connection conn = driver.connect("jdbc:tarantool://" + host + ":" + port);
 		
-		String sql = "select * from users where userid = " + 60;
+		String sql = "select * from users where userid = " + 99;
 //		String sql = "select username uname, age from users where userid = " + 56;
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(sql);
@@ -28,5 +28,7 @@ public class TestQuery {
 				log.info("userid="+rs.getInt("userid")+", username="+rs.getString("username")+", sex="+rs.getBoolean("sex")+", age=" + rs.getInt("age"));
 			}
 		}
+		
+		conn.close();
 	}
 }

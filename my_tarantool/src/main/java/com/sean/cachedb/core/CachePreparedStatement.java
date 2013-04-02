@@ -22,22 +22,140 @@ import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.logging.Logger;
 
-public class CachePreparedStatement implements PreparedStatement{
+import org.json.JSONObject;
+import org.tarantool.core.Tuple;
 
-	public ResultSet executeQuery(String sql) throws SQLException {
-		// TODO Auto-generated method stub
+import com.salesforce.phoenix.parse.DeleteStatement;
+import com.salesforce.phoenix.parse.SQLStatement;
+import com.salesforce.phoenix.parse.UpsertStatement;
+
+public class CachePreparedStatement extends CacheStatement implements PreparedStatement{
+	
+	private static Logger log = Logger.getLogger(CachePreparedStatement.class.getName());
+	
+	private Object[] values;
+	private String sql;
+	private CacheSQLParser parser;
+	
+	public CachePreparedStatement(Connection conn, String s) throws Exception {
+		super(conn);
+		this.sql = s;
+		
+		parser = new CacheSQLParser(connection, sql).parse();
+		parse(parser, sql);
+		
+		if(bindCount > 0) {
+			values = new Object[bindCount];
+		}
+	}
+
+	public ResultSet executeQuery() throws SQLException {
+		try{			
+			return runQ();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
+	
+	private ResultSet runQ() throws Exception {
+        JSONObject fields = new JSONObject(tableInfo.getFields());
 
-	public int executeUpdate(String sql) throws SQLException {
-		// TODO Auto-generated method stub
+        Tuple tuple = new Tuple(conditions.size());
+
+        for(Map.Entry<String, Object> entry : conditions.entrySet()) {
+            String fieldInfo = fields.getString(entry.getKey());
+
+            int index = Integer.parseInt(String.valueOf(entry.getValue()));
+
+            setValue(tuple, fieldInfo, values[index]);
+        }
+
+        Tuple _tuple = cacheConnection.getTaranConn().findOne(tableInfo.getSpace(), 0, 0, tuple);
+        if(_tuple != null) {
+            log.info("userid="+_tuple.getInt(0)+", username=" + _tuple.getString(1, CONFIG.DEFAULT_ENCODE)+", sex=" + (_tuple.getBoolean(2) ? "man" : "women") + ", age=" + _tuple.getInt(3));
+        }
+
+        TarantoolResultSetMetaData trsmd = new TarantoolResultSetMetaData(tableInfo, this.fields);
+        //封装为标准的ResultSet结果集
+        ResultSet rs = new TarantoolReslutSet(_tuple, trsmd);
+
+        return rs;
+
+    }
+	
+	public int executeUpdate() throws SQLException {
+		try{			
+			SQLStatement statement = parser.getStatement();
+			if(statement instanceof UpsertStatement) {
+				return runU();
+			}else if(statement instanceof DeleteStatement){
+				return runD();
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		return 0;
 	}
+	
+	private Integer runU() throws Exception {
+        JSONObject fields = new JSONObject(tableInfo.getFields());
+
+        String fieldInfo = fields.getString(unique_index_column);
+        Tuple key = new Tuple(1);
+        Object value = paramValues.get(unique_index_column);
+
+        setValue(key, fieldInfo, values[Integer.parseInt(String.valueOf(value))]);
+
+        Tuple tuple = cacheConnection.getTaranConn().findOne(tableInfo.getSpace(), 0, 0, key);
+        if(tuple == null) { //构建新的Tuple，执行插入操作
+            if(paramValues.size() != fields.length()){
+                throw new UnSupportException("can't insert the record because a few fields have not be specified values");
+            } else {
+                tuple = new Tuple(fields.length());
+                Iterator<?> it = fields.keys();
+                while(it.hasNext()) {
+                    String _fieldName = (String) it.next();
+                    String _fieldInfo = fields.getString(_fieldName);
+
+                    int index = Integer.parseInt(String.valueOf(paramValues.get(_fieldName)));
+                    setValue(tuple, _fieldInfo, values[index]);
+                }
+                return cacheConnection.getTaranConn().insert(tableInfo.getSpace(), tuple);
+            }
+        }else {
+            for(Map.Entry<String, Object> entry : paramValues.entrySet()) {
+                String _fieldInfo = fields.getString(entry.getKey());
+
+                int index = Integer.parseInt(String.valueOf(entry.getValue()));
+                setValue(tuple, _fieldInfo, values[index]);
+            }
+            return cacheConnection.getTaranConn().replace(tableInfo.getSpace(), tuple);
+        }
+    }
+	
+	private Integer runD() throws Exception {
+        JSONObject fields = new JSONObject(tableInfo.getFields());
+
+        Tuple tuple = new Tuple(conditions.size());
+
+        for(Map.Entry<String, Object> entry : conditions.entrySet()) {
+            String fieldInfo = fields.getString(entry.getKey());
+
+            int index = Integer.parseInt(String.valueOf(entry.getValue()));
+
+            setValue(tuple, fieldInfo, values[index]);
+        }
+
+        return cacheConnection.getTaranConn().delete(tableInfo.getSpace(), tuple);
+    }
 
 	public void close() throws SQLException {
-		// TODO Auto-generated method stub
-		
+		super.close();
 	}
 
 	public int getMaxFieldSize() throws SQLException {
@@ -240,12 +358,12 @@ public class CachePreparedStatement implements PreparedStatement{
 		return false;
 	}
 
-	public ResultSet executeQuery() throws SQLException {
+	public ResultSet executeQuery(String sql) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public int executeUpdate() throws SQLException {
+	public int executeUpdate(String sql) throws SQLException {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -256,8 +374,7 @@ public class CachePreparedStatement implements PreparedStatement{
 	}
 
 	public void setBoolean(int parameterIndex, boolean x) throws SQLException {
-		// TODO Auto-generated method stub
-		
+		values[parameterIndex] = x;
 	}
 
 	public void setByte(int parameterIndex, byte x) throws SQLException {
@@ -271,8 +388,7 @@ public class CachePreparedStatement implements PreparedStatement{
 	}
 
 	public void setInt(int parameterIndex, int x) throws SQLException {
-		// TODO Auto-generated method stub
-		
+		values[parameterIndex] = x;
 	}
 
 	public void setLong(int parameterIndex, long x) throws SQLException {
@@ -292,13 +408,11 @@ public class CachePreparedStatement implements PreparedStatement{
 
 	public void setBigDecimal(int parameterIndex, BigDecimal x)
 			throws SQLException {
-		// TODO Auto-generated method stub
-		
+		values[parameterIndex] = x;
 	}
 
 	public void setString(int parameterIndex, String x) throws SQLException {
-		// TODO Auto-generated method stub
-		
+		values[parameterIndex] = x;
 	}
 
 	public void setBytes(int parameterIndex, byte[] x) throws SQLException {
