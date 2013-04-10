@@ -11,6 +11,7 @@
       <module fileurl="file://$PROJECT_DIR$/my_redis/my_redis.iml" filepath="$PROJECT_DIR$/my_redis/my_redis.iml" />
       <module fileurl="file://$PROJECT_DIR$/my_sphinx/my_sphinx.iml" filepath="$PROJECT_DIR$/my_sphinx/my_sphinx.iml" />
       <module fileurl="file://$PROJECT_DIR$/my_sqlite/my_sqlite.iml" filepath="$PROJECT_DIR$/my_sqlite/my_sqlite.iml" />
+      <module fileurl="file://$PROJECT_DIR$/my_tarantool/my_tarantool.iml" filepath="$PROJECT_DIR$/my_tarantool/my_tarantool.iml" />
       <module fileurl="file://$PROJECT_DIR$/webapp/webapp.iml" filepath="$PROJECT_DIR$/webapp/webapp.iml" />
     </modules>
   </component>

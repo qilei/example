@@ -21,7 +21,6 @@ import com.salesforce.phoenix.parse.TableNode;
 import com.sean.my_tarantool.CONFIG;
 import com.sean.my_tarantool.Connection;
 import com.sean.my_tarantool.MetaData;
-import com.sean.my_tarantool.TestMyTarantool;
 
 
 public class SelectCompile implements Compile {

@@ -29,6 +29,7 @@
         <module name="my_redis" />
         <module name="my_sphinx" />
         <module name="my_sqlite" />
+        <module name="my_tarantool" />
         <module name="TestModule" />
         <module name="webapp" />
       </profile>
