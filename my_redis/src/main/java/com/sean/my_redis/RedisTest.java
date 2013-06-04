@@ -2,9 +2,11 @@ package com.sean.my_redis;
 
 import redis.clients.jedis.Jedis;
 
+import java.util.Set;
+
 public class RedisTest {
 	
-	private final static String HOST = "192.168.79.128";
+	private final static String HOST = "10.13.81.130";
 	private final static int PORT = 6379;
 	
 	private final static int num = 100000;
@@ -15,8 +17,10 @@ public class RedisTest {
 	public static void main(String[] args) {
 		
 		Jedis jedis = new Jedis(HOST, PORT);
-		
-		jedis.flushDB();
+
+//		jedis.flushDB();
+
+        testSortSet(jedis);
 		
 //		String status = jedis.set("foo", "bar");
 //		System.out.println("foo = bar is set into redis : " + status);
@@ -38,18 +42,29 @@ public class RedisTest {
 //		System.out.println();
 		
 		//压力测试
-		long start = System.currentTimeMillis();
-		for(int i = 0; i < num; i++) {
-			jedis.set("key"+i, "value"+i);
-		}
-		System.out.println("Set " +num+" key-values cost time " + (System.currentTimeMillis()-start) + "ms.");
-		
-		start = System.currentTimeMillis();
-		for(int i = 0; i < num; i++) {
-			jedis.get("key"+i);
-		}
-		System.out.println("Get " +num+" key-values cost time " + (System.currentTimeMillis()-start) + "ms.");
+//		long start = System.currentTimeMillis();
+//		for(int i = 0; i < num; i++) {
+//			jedis.set("key"+i, "value"+i);
+//		}
+//		System.out.println("Set " +num+" key-values cost time " + (System.currentTimeMillis()-start) + "ms.");
+//
+//		start = System.currentTimeMillis();
+//		for(int i = 0; i < num; i++) {
+//			jedis.get("key"+i);
+//		}
+//		System.out.println("Get " +num+" key-values cost time " + (System.currentTimeMillis()-start) + "ms.");
+
+
 		
 	}
+
+    public static void testSortSet(Jedis jedis) {
+        try {
+            Set<String> setValues = jedis.zrangeByScore("hot2_0_5701520653262262292",0,9, 0,10);
+            System.out.println(setValues);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }
